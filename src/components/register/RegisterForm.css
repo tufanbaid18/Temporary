@@ -1,0 +1,174 @@
+
+/* ===== HERO ===== */
+.hero {
+  min-height: 100vh;
+  width: 100%;
+  background: url("/public/images/Register.png") no-repeat center / cover;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 60px 8%;
+}
+
+/* Overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 20, 40, 0.65);
+  backdrop-filter: blur(3px);
+  z-index: 1;
+}
+
+/* ===== LEFT TEXT ===== */
+.left-text {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  max-width: 520px;
+}
+
+.left-text .logo {
+  max-width: 360px;
+  margin-bottom: 20px;
+}
+
+.left-text h1 {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: #a6ff00;
+  margin-bottom: 18px;
+  line-height: 1.3;
+}
+
+.left-text p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #f1f1f1;
+}
+
+/* ===== FORM BOX ===== */
+.form-box {
+  position: relative;
+  z-index: 2;
+  width: 420px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  padding: 40px 35px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  color: #fff;
+}
+
+.form-box h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+/* ===== INPUTS ===== */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  color: #222;
+}
+
+/* ===== CHECKBOX ===== */
+.checkbox {
+  display: flex;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #d8e6f3;
+  margin: 10px 0 20px;
+  line-height: 1.4;
+}
+
+.checkbox input {
+  margin-top: 3px;
+  accent-color: #00ff99;
+}
+
+.checkbox a {
+  color: #00ff99;
+  text-decoration: none;
+}
+
+/* ===== BUTTON ===== */
+.btn3 {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(90deg, #00c896, #00ff99);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn3:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(90deg, #00b884, #00e68a);
+}
+
+/* ===== LOGIN LINK ===== */
+.login-link {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #cfe3f0;
+}
+
+.login-link a {
+  color: #00ff99;
+  text-decoration: none;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 60px 5%;
+    gap: 40px;
+  }
+
+  .left-text {
+    max-width: 100%;
+  }
+
+  .left-text .logo {
+    margin: 0 auto 20px;
+  }
+
+  .form-box {
+    width: 100%;
+    max-width: 420px;
+  }
+}
+
+@media (max-width: 480px) {
+  .left-text h1 {
+    font-size: 1.5rem;
+  }
+
+  .form-box {
+    padding: 25px 20px;
+  }
+
+  .btn {
+    font-size: 0.9rem;
+  }
+}

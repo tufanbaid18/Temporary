@@ -1,0 +1,203 @@
+/* ===== YEAR TABS ===== */
+.year-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 35px;
+}
+
+/* Fade-in animation */
+.year-tabs button {
+ padding: 10px 22px;
+  border-radius: 30px;
+  border: 1px solid #70a83e;
+  background: transparent;          /* ✅ inactive transparent */
+  color: #70a83e;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  /* 🔥 fade-in */
+  opacity: 0;
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+/* stagger effect */
+.year-tabs button:nth-child(1) { animation-delay: 0.1s; }
+.year-tabs button:nth-child(2) { animation-delay: 0.2s; }
+.year-tabs button:nth-child(3) { animation-delay: 0.3s; }
+
+.year-tabs button.active {
+  background: #70a83e;
+  color: #fff;
+}
+
+/* ===== FADE KEYFRAME ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+/* ================= PROGRAM SECTION ================= */
+
+.program-section {
+  padding: 70px 0;
+  background: #f9fbfd;
+}
+
+/* Day tabs */
+.date-tabs {
+  display: flex;
+  justify-content: left;
+  gap: 12px;
+  margin-bottom: 50px;
+}
+
+.date-tabs button {
+  padding: 10px 22px;
+  border-radius: 30px;
+  border: 1px solid #70a83e;
+  background: transparent;          /* ✅ inactive transparent */
+  color: #70a83e;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.date-tabs button.active {
+  background: #70a83e;
+  color: #fff;
+  border-color: #70a83e;
+}
+
+/* Venue block */
+.venue-section-block {
+  margin-bottom: 60px;
+}
+
+.venue-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #124559;
+  
+}
+
+/* Cards */
+/* ================= PROGRAM CARD ================= */
+.program-card.modern {
+  position: relative;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  height: 100%;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.program-card.modern:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* ================= TIME PILL ================= */
+.program-time-pill {
+  display: inline-block;
+  background: #70a83e;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+/* ================= TITLE ================= */
+.program-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 18px;
+  color: #1e293b;
+}
+
+/* ================= SPEAKER ================= */
+.program-speaker-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.speaker-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+.speaker-name {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.speaker-role {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* ================= FOOTER ================= */
+.program-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px dashed #e5e7eb;
+}
+
+.venue-badge {
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.program-date {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* ================= ANIMATION ================= */
+.fade-item {
+  animation: fadeUp 0.45s ease both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 576px) {
+  .program-card.modern {
+    padding: 16px;
+  }
+}
