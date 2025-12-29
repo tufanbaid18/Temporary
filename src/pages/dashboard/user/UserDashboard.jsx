@@ -34,18 +34,33 @@ export default function UserDashboard() {
             </div>
 
             {/* RIGHT SIDE: PHOTO */}
-            <img
-              src={
-                user.profile_image
-                  ? `http://127.0.0.1:8000${user.profile_image}`
-                  :
-                  "https://i.pravatar.cc/100"
-              }
-              alt="Profile"
-              className="rounded-circle shadow-sm dashboard-avatar"
-              style={{ width: 180, height: 180, objectFit: "cover" }}
+            {user.profile_image ? (
+  <img
+    src={`http://127.0.0.1:8000${user.profile_image}`}
+    alt="Profile"
+    className="rounded-circle shadow-sm dashboard-avatar"
+    style={{ width: 180, height: 180, objectFit: "cover" }}
+  />
+) : (
+  <div
+    className="rounded-circle shadow-sm dashboard-avatar"
+    style={{
+      width: 150,
+      height: 150,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "#70a83e",
+      color: "#fff",
+      fontSize: "30px",
+      fontWeight: "600",
+      textTransform: "uppercase",
+    }}
+  >
+    {`${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`}
+  </div>
+)}
 
-            />
 
           </div>
 

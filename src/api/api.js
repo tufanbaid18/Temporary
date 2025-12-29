@@ -1,8 +1,14 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://68.178.168.255:8086/api",  // <-- Correct main API root
+  baseURL: "http://68.178.168.255:9000/api",  
 });
+
+
+// const api = axios.create({
+//   baseURL: "http://127.0.0.1:8000/api",  // <-- Correct main API root
+// });
+
 
 api.interceptors.request.use((config) => {
   // 1) Add timestamp only to GET

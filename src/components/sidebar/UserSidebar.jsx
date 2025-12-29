@@ -23,12 +23,12 @@ export default function UserSidebar() {
       color: "#0d6efd",
       path: "/",
     },
-    {
-      label: "Profile",
-      icon: "ri-user-3-line",
-      color: "#6f42c1",
-      path: "/user/profile",
-    },
+    // {
+    //   label: "Profile",
+    //   icon: "ri-user-3-line",
+    //   color: "#6f42c1",
+    //   path: "/user/profile",
+    // },
     {
       label: "Messages",
       icon: "ri-message-3-line",
@@ -43,7 +43,7 @@ export default function UserSidebar() {
       color: "#ff8c00",
       children: [
         { label: "My Handshakes", path: "/handshakes" },
-        { label: "My Bookmarks", path: "/my-bookmarks" },
+        // { label: "My Bookmarks", path: "/my-bookmarks" },
       ],
     },
 

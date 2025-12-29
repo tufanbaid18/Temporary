@@ -4,12 +4,14 @@ import useLogout from "../../hooks/logout";
 import { useQueryClient } from "@tanstack/react-query";
 import NotificationBell from "../notifications/NotificationBell";
 //import useAuthUser from "../../hooks/auth/useAuthUser";
+import { useUserProfile } from "../../hooks/profile/useUserProfile";
 
 export default function UserTopbar() {
 
   const logout = useLogout();
   //const { data: user } = useAuthUser(); // 👈 get user info
-  const user = JSON.parse(localStorage.getItem("user"));
+  const { data: user, isLoading: uLoading } = useUserProfile();
+  // const user = JSON.parse(localStorage.getItem("user"));
   const queryClient = useQueryClient();
   const reload = () => {
     queryClient.invalidateQueries();
@@ -20,7 +22,7 @@ export default function UserTopbar() {
 
         {/* Left */}
         <div className="d-flex align-items-center gap-2">
-          
+
           <Link className="navbar-brand fw-bold" to="/" style={{ "fontSize": "22px" }}>
             <img src="images/MyNeuron-Logo.png" style={{ width: "200px", height: "50px", objectFit: "contain" }} />
           </Link>
@@ -71,21 +73,36 @@ export default function UserTopbar() {
               className="btn d-flex align-items-center gap-2"
               data-bs-toggle="dropdown"
             >
-              <img
-                src={
-                  user.profile_image
-                    ? `http://127.0.0.1:8000${user.profile_image}`
-                    : "https://i.pravatar.cc/100?img=12"
-                }
-                className="rounded-circle avatar"
-                alt="Profile"
-              />
+              {/* {user?.profile_image ? (
+                <img
+                  src={`http://127.0.0.1:8000${user.profile_image}`}
+                  className="rounded-circle avatar"
+                  alt="Profile"
+                />
+              ) : (
+                <div
+                  className="rounded-circle avatar"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "#61b561",
+                    color: "#fff",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {`${user?.first_name?.[0] || ""}${user?.last_name?.[0] || ""}`}
+                </div>
+              )} */}
+
 
 
               {/* Show user name */}
               <div className="d-flex flex-column text-start lh-1">
                 <span className="fw-semibold">{user?.first_name} {user?.last_name}</span>
-                <small className="text-muted">{user?.role}</small>
+                <small className="text-muted" >{user?.profile_title}</small>
               </div>
 
               <i className="ri-arrow-down-s-line"></i>
@@ -93,7 +110,7 @@ export default function UserTopbar() {
 
             <ul className="dropdown-menu dropdown-menu-end shadow-sm">
               <li>
-                <Link className="dropdown-item" to="user/profile/edit">
+                <Link className="dropdown-item" to="user/profile">
                   Profile
                 </Link>
               </li>

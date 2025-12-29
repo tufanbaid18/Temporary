@@ -22,7 +22,7 @@ import Profile from "../pages/user/Profile";
 import Bookmark from "../components/bookmark/Bookmark";
 import PostLayout from "../layouts/PostLayout";
 import RegisterForm from "../components/register/RegisterForm";
-
+import GatcDashboard from "../components/gatcdashboard/GatcDashboard";
 
 export const router = createBrowserRouter
   ([
@@ -135,6 +135,7 @@ export const router = createBrowserRouter
         { path: "/gatc/program", element: <Program /> },
         { path: "/user/profile", element: <Profile /> },
         { path: "/my-bookmarks", element: <Bookmark /> },
+        { path: "/gatc/dashboard", element: <GatcDashboard /> },
 
         {
           path: "/speakers/:id",

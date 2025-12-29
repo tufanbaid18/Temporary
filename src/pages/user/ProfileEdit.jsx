@@ -22,11 +22,19 @@ import {
   useDeleteEducation,
 } from "../../hooks/profile/useEducationList";
 
+import {
+  usePastExperienceList,
+  useAddPastExperience,
+  useUpdatePastExperience,
+  useDeletePastExperience,
+} from "../../hooks/profile/usePastExperience";
+
+
 
 
 
 export default function EditProfile() {
-  
+
   const [activeTab, setActiveTab] = useState("basic");
 
   // --------------------- FETCH DATA ---------------------
@@ -34,6 +42,8 @@ export default function EditProfile() {
   const { data: personalData } = usePersonalDetail();
   const { data: professionalData } = useProfessionalDetail();
   const { data: educationData } = useEducationList();
+  const { data: pastData } = usePastExperienceList();
+
 
   const updateUser = useUpdateUserProfile();
   const updatePersonal = useUpdatePersonalDetail();
@@ -41,6 +51,9 @@ export default function EditProfile() {
   const addEducationMutation = useAddEducation();
   const updateEducationMutation = useUpdateEducation();
   const deleteEducationMutation = useDeleteEducation();
+  const addPastMutation = useAddPastExperience();
+  const updatePastMutation = useUpdatePastExperience();
+  const deletePastMutation = useDeletePastExperience();
 
 
 
@@ -54,7 +67,7 @@ export default function EditProfile() {
     profile_title: "",
   });
 
-  const [contact, setContact] = useState({
+  const [personal, setPersonal] = useState({
     city: "",
     country: "",
     gender: "",
@@ -84,59 +97,71 @@ export default function EditProfile() {
     languages_spoken: "",
   });
 
+
   const [pastList, setPastList] = useState([]);
 
+
+
   // --------------------- LOAD DATA INTO STATE ---------------------
-  useEffect(() => {
-    if (userData) {
-      setBasic({
-        title: userData.title || "",
-        first_name: userData.first_name || "",
-        middle_name: userData.middle_name || "",
-        last_name: userData.last_name || "",
-        profile_title: userData.profile_title || "",
-      });
-    }
-    if (personalData) {
-      setContact({
-        city: personalData.city || "",
-        country: personalData.country || "",
-        gender: personalData.gender || "",
-        dob: personalData.dob || "",
-        biosketch: personalData.biosketch || "",
-        linkedin: personalData.linkedin || "",
-        x_handle: personalData.x_handle || "",
-        articles_journals: personalData.articles_journals || "",
-        book_chapters: personalData.book_chapters || "",
-        research_links: personalData.research_links || [],
-      });
-    }
-    if (professionalData) {
-      setProfessional({
-        current_role: professionalData.current_role || "",
-        current_organization: professionalData.current_organization || "",
-        current_department: professionalData.current_department || "",
-        current_start_month: professionalData.current_start_month || "",
-        current_start_year: professionalData.current_start_year || "",
-        current_description: professionalData.current_description || "",
-        work_email: professionalData.work_email || "",
-        contact_number: professionalData.contact_number || "",
-        website: professionalData.website || "",
-        lab: professionalData.lab || "",
-        work_address: professionalData.work_address || "",
-        skill_set: professionalData.skill_set || "",
-        languages_spoken: professionalData.languages_spoken || "",
-      });
-      setPastList(professionalData.past_experiences || []);
-    }
-    if (educationData) {
-      setEducationList(educationData);
-    }
-  }, [userData, personalData, professionalData, educationData]);
+useEffect(() => {
+  if (userData) {
+    setBasic({
+      title: userData.title || "",
+      first_name: userData.first_name || "",
+      middle_name: userData.middle_name || "",
+      last_name: userData.last_name || "",
+      profile_title: userData.profile_title || "",
+    });
+  }
+
+  if (personalData) {
+    setPersonal({
+      city: personalData.city || "",
+      country: personalData.country || "",
+      gender: personalData.gender || "",
+      dob: personalData.dob || "",
+      biosketch: personalData.biosketch || "",
+      linkedin: personalData.linkedin || "",
+      x_handle: personalData.x_handle || "",
+      articles_journals: personalData.articles_journals || "",
+      book_chapters: personalData.book_chapters || "",
+      research_links: personalData.research_links || [],
+    });
+  }
+
+  if (professionalData) {
+    setProfessional({
+      current_role: professionalData.current_role || "",
+      current_organization: professionalData.current_organization || "",
+      current_department: professionalData.current_department || "",
+      current_start_month: professionalData.current_start_month || "",
+      current_start_year: professionalData.current_start_year || "",
+      current_description: professionalData.current_description || "",
+      work_email: professionalData.work_email || "",
+      contact_number: professionalData.contact_number || "",
+      website: professionalData.website || "",
+      lab: professionalData.lab || "",
+      work_address: professionalData.work_address || "",
+      skill_set: professionalData.skill_set || "",
+      languages_spoken: professionalData.languages_spoken || "",
+    });
+  }
+
+  if (educationData) {
+    setEducationList(educationData);
+  }
+}, [userData, personalData, professionalData, educationData]);
+
+useEffect(() => {
+  if (pastData) {
+    setPastList(pastData);
+  }
+}, [pastData]);
+
 
   // --------------------- HANDLERS ---------------------
   const handleBasicChange = (field, value) => setBasic({ ...basic, [field]: value });
-  const handleContactChange = (field, value) => setContact({ ...contact, [field]: value });
+  const handlePersonalChange = (field, value) => setPersonal({ ...personal, [field]: value });
   const handleProfessionalChange = (field, value) =>
     setProfessional({ ...professional, [field]: value });
 
@@ -168,9 +193,20 @@ export default function EditProfile() {
   const addPastField = () => {
     setPastList([
       ...pastList,
-      { role: "", organization: "", department: "", start_month: "", start_year: "", end_month: "", end_year: "", description: "" },
+      {
+        id: undefined, // ⬅️ force no id
+        role: "",
+        organization: "",
+        department: "",
+        start_month: "",
+        start_year: "",
+        end_month: "",
+        end_year: "",
+        description: "",
+      },
     ]);
   };
+
 
   const removePastField = (index) => {
     const toDelete = pastList[index];
@@ -178,13 +214,35 @@ export default function EditProfile() {
     setPastList(pastList.filter((_, i) => i !== index));
   };
 
+  const cleanPayload = (obj) =>
+    Object.fromEntries(
+      Object.entries(obj).filter(
+        ([_, v]) => v !== "" && v !== null && v !== undefined
+      )
+    );
+
+
+
   // --------------------- SAVE ---------------------
-  const handleSave = async () => {
+  const saveBasic = async () => {
     try {
       await updateUser.mutateAsync(basic);
-      await updatePersonal.mutateAsync(contact);
-      await updateProfessional.mutateAsync({ ...professional, past_experiences: pastList });
-      // Education
+      await updatePersonal.mutateAsync({
+        biosketch: personal.biosketch,
+        linkedin: personal.linkedin,
+        x_handle: personal.x_handle,
+        gender: personal.gender,
+        dob: personal.dob,
+      });
+      alert("Basic details saved");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save basic details");
+    }
+  };
+
+  const saveEducation = async () => {
+    try {
       for (const edu of educationList) {
         if (edu.id) {
           await updateEducationMutation.mutateAsync({ id: edu.id, data: edu });
@@ -192,18 +250,99 @@ export default function EditProfile() {
           await addEducationMutation.mutateAsync(edu);
         }
       }
-      alert("Profile updated successfully!");
+      alert("Education saved");
     } catch (err) {
       console.error(err);
-      alert("Failed to update profile.");
+      alert("Failed to save education");
     }
   };
+
+  // const saveWork = async () => {
+  //   try {
+  //     // save current job
+  //     await updateProfessional.mutateAsync(professional);
+
+  //     // sync past experiences
+  //     for (const exp of pastList) {
+  //       if (exp.id) {
+  //         await updatePastMutation.mutateAsync({
+  //           id: exp.id,
+  //           data: exp,
+  //         });
+  //       } else {
+  //         await addPastMutation.mutateAsync(exp);
+  //       }
+  //     }
+
+  //     alert("Work experience saved");
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert("Failed to save work experience");
+  //   }
+  // };
+
+const saveWork = async () => {
+  try {
+    // Save ONLY current professional info
+    await updateProfessional.mutateAsync({
+      current_role: professional.current_role,
+      current_organization: professional.current_organization,
+      current_department: professional.current_department,
+      current_start_month: professional.current_start_month,
+      current_start_year: professional.current_start_year,
+      current_description: professional.current_description,
+    });
+
+    // Save past experiences separately
+    for (const exp of pastList) {
+      if (exp.id) {
+        await updatePastMutation.mutateAsync({
+          id: exp.id,
+          data: exp,
+        });
+      } else {
+        await addPastMutation.mutateAsync(exp);
+      }
+    }
+
+    alert("Work experience saved");
+  } catch (err) {
+    console.error(err);
+    alert("Failed to save work experience");
+  }
+};
+
+
+
+
+
+  const saveContact = async () => {
+    try {
+      await updateProfessional.mutateAsync({
+        work_email: professional.work_email,
+        contact_number: professional.contact_number,
+        website: professional.website,
+        lab: professional.lab,
+        work_address: professional.work_address,
+        skill_set: professional.skill_set,
+        languages_spoken: professional.languages_spoken,
+      });
+      alert("Contact details saved");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save contact details");
+    }
+  };
+
 
   if (loadingUser) return <div>Loading...</div>;
 
   // --------------------- RENDER ---------------------
   return (
     <div className="container py-4">
+      <button className="btn btn-outline-secondary mb-3" onClick={() => window.history.back()}>
+        <i className="ri-arrow-left-line me-1"></i> Back
+      </button>
       <h2 className="mb-4">Edit Profile</h2>
       <div className="profile-edit-wrapper">
         {/* TAB HEADERS */}
@@ -299,32 +438,32 @@ export default function EditProfile() {
                     <textarea
                       className="form-control"
                       rows={4}
-                      value={contact.biosketch}
-                      onChange={(e) => handleContactChange("biosketch", e.target.value)}
+                      value={personal.biosketch}
+                      onChange={(e) => handlePersonalChange("biosketch", e.target.value)}
                     />
                   </div>
                   <div className="col-md-6">
                     <label className="form-label">LinkedIn</label>
                     <input
                       className="form-control"
-                      value={contact.linkedin}
-                      onChange={(e) => handleContactChange("linkedin", e.target.value)}
+                      value={personal.linkedin}
+                      onChange={(e) => handlePersonalChange("linkedin", e.target.value)}
                     />
                   </div>
                   <div className="col-md-6">
                     <label className="form-label">X Handle</label>
                     <input
                       className="form-control"
-                      value={contact.x_handle}
-                      onChange={(e) => handleContactChange("x_handle", e.target.value)}
+                      value={personal.x_handle}
+                      onChange={(e) => handlePersonalChange("x_handle", e.target.value)}
                     />
                   </div>
                   <div className="col-md-3">
                     <label className="form-label">Gender</label>
                     <select
                       className="form-select"
-                      value={contact.gender}
-                      onChange={(e) => handleContactChange("gender", e.target.value)}
+                      value={personal.gender}
+                      onChange={(e) => handlePersonalChange("gender", e.target.value)}
                     >
                       <option value="">Select</option>
                       <option>Male</option>
@@ -337,12 +476,18 @@ export default function EditProfile() {
                     <input
                       type="date"
                       className="form-control"
-                      value={contact.dob || ""}
-                      onChange={(e) => handleContactChange("dob", e.target.value)}
+                      value={personal.dob || ""}
+                      onChange={(e) => handlePersonalChange("dob", e.target.value)}
                     />
                   </div>
                 </div>
               </div>
+              <div className="mt-4 text-end">
+                <button className="btn btn-primary" onClick={saveBasic}>
+                  Save Basic Details
+                </button>
+              </div>
+
             </div>
           )}
 
@@ -389,19 +534,35 @@ export default function EditProfile() {
                       />
                     </div>
                     <div className="col-md-6">
-                      <label>Institute / University</label>
+                      <label>Institute</label>
                       <input
                         className="form-control"
-                        value={edu.institute || edu.university || ""}
+                        value={edu.institute || ""}
                         onChange={(e) => handleEducationChange(index, "institute", e.target.value)}
                       />
                     </div>
+                    <div className="col-md-6">
+                      <label>University</label>
+                      <input
+                        className="form-control"
+                        value={edu.university || ""}
+                        onChange={(e) => handleEducationChange(index, "university", e.target.value)}
+                      />
+                    </div>
                     <div className="col-md-3">
-                      <label>Place / Country</label>
+                      <label>Place</label>
                       <input
                         className="form-control"
                         value={edu.place || ""}
                         onChange={(e) => handleEducationChange(index, "place", e.target.value)}
+                      />
+                    </div>
+                    <div className="col-md-3">
+                      <label>Country</label>
+                      <input
+                        className="form-control"
+                        value={edu.country || ""}
+                        onChange={(e) => handleEducationChange(index, "country", e.target.value)}
                       />
                     </div>
                     <div className="col-md-3">
@@ -411,6 +572,7 @@ export default function EditProfile() {
                         className="form-control"
                         value={edu.start_year || ""}
                         onChange={(e) => handleEducationChange(index, "start_year", e.target.value)}
+                        placeholder="YYYY"
                       />
                     </div>
                     <div className="col-md-3">
@@ -420,11 +582,18 @@ export default function EditProfile() {
                         className="form-control"
                         value={edu.end_year || ""}
                         onChange={(e) => handleEducationChange(index, "end_year", e.target.value)}
+                        placeholder="YYYY"
                       />
                     </div>
                   </div>
                 </div>
               ))}
+              <div className="mt-4 text-end">
+                <button className="btn btn-primary" onClick={saveEducation}>
+                  Save Education
+                </button>
+              </div>
+
             </div>
           )}
 
@@ -469,6 +638,7 @@ export default function EditProfile() {
                       className="form-control"
                       value={professional.current_start_month || ""}
                       onChange={(e) => handleProfessionalChange("current_start_month", e.target.value)}
+                      placeholder="Between 1-12"
                     />
                   </div>
                   <div className="col-md-3">
@@ -478,6 +648,7 @@ export default function EditProfile() {
                       className="form-control"
                       value={professional.current_start_year || ""}
                       onChange={(e) => handleProfessionalChange("current_start_year", e.target.value)}
+                      placeholder="YYYY"
                     />
                   </div>
                   <div className="col-12">
@@ -553,6 +724,7 @@ export default function EditProfile() {
                         className="form-control"
                         value={work.start_month}
                         onChange={(e) => handlePastChange(index, "start_month", e.target.value)}
+                        placeholder="Between 1-12"
                       />
                     </div>
                     <div className="col-md-3">
@@ -562,6 +734,7 @@ export default function EditProfile() {
                         className="form-control"
                         value={work.start_year}
                         onChange={(e) => handlePastChange(index, "start_year", e.target.value)}
+                        placeholder="YYYY"
                       />
                     </div>
                     <div className="col-md-3">
@@ -571,6 +744,7 @@ export default function EditProfile() {
                         className="form-control"
                         value={work.end_month}
                         onChange={(e) => handlePastChange(index, "end_month", e.target.value)}
+                        placeholder="Between 1-12"
                       />
                     </div>
                     <div className="col-md-3">
@@ -580,6 +754,7 @@ export default function EditProfile() {
                         className="form-control"
                         value={work.end_year}
                         onChange={(e) => handlePastChange(index, "end_year", e.target.value)}
+                        placeholder="YYYY"
                       />
                     </div>
                     <div className="col-12">
@@ -594,6 +769,13 @@ export default function EditProfile() {
                   </div>
                 </div>
               ))}
+
+              <div className="mt-4 text-end">
+                <button className="btn btn-primary" onClick={saveWork}>
+                  Save Work Experience
+                </button>
+              </div>
+
 
 
             </div>
@@ -626,6 +808,7 @@ export default function EditProfile() {
                     className="form-control"
                     value={professional.website || ""}
                     onChange={(e) => handleProfessionalChange("website", e.target.value)}
+                    placeholder="include https://"
                   />
                 </div>
                 <div className="col-md-6">
@@ -645,26 +828,42 @@ export default function EditProfile() {
                     onChange={(e) => handleProfessionalChange("work_address", e.target.value)}
                   />
                 </div>
-                {/* <div className="col-12">
-                  <label>Skills / Languages</label>
+                <div className="col-12">
+                  <label>Skills</label>
                   <textarea
                     className="form-control"
                     rows={2}
-                    value={`${professional.skill_set || ""}\nLanguages: ${professional.languages_spoken || ""}`}
+                    value={professional.skill_set || ""}
                     onChange={(e) =>
                       handleProfessionalChange("skill_set", e.target.value)
                     }
+                    placeholder="e.g. React, Django, Machine Learning"
                   />
-                </div> */}
+                </div>
+
+                <div className="col-12 mt-2">
+                  <label>Languages Spoken</label>
+                  <textarea
+                    className="form-control"
+                    rows={2}
+                    value={professional.languages_spoken || ""}
+                    onChange={(e) =>
+                      handleProfessionalChange("languages_spoken", e.target.value)
+                    }
+                    placeholder="e.g. English, Hindi, French"
+                  />
+                </div>
+
               </div>
+              <div className="mt-4 text-end">
+                <button className="btn btn-primary" onClick={saveContact}>
+                  Save Contact
+                </button>
+              </div>
+
             </div>
           )}
 
-          <div className="mt-4 text-end">
-            <button className="btn btn-primary" onClick={handleSave}>
-              Save Changes
-            </button>
-          </div>
         </div>
       </div>
     </div>

@@ -80,3 +80,29 @@ export const uploadProfileImage = async (formData) => {
   });
   return res.data;
 };
+
+
+
+/* =================================================
+   📝 PAST EXPERIENCE
+================================================= */
+
+export const getPastExperienceList = async () => {
+  const res = await api.get("/profile/past-experience/");
+  return res.data;
+};
+
+export const addPastExperience = async (data) => {
+  const res = await api.post("/profile/past-experience/add/", data);
+  return res.data;
+};
+
+export const updatePastExperience = async ({ id, data }) => {
+  const res = await api.patch(`/profile/past-experience/${id}/update/`, data);
+  return res.data;
+};
+
+export const deletePastExperience = async (id) => {
+  const res = await api.delete(`/profile/past-experience/${id}/delete/`);
+  return res.data;
+};

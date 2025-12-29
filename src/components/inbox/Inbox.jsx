@@ -28,34 +28,34 @@ export default function Inbox() {
   // -----------------------------------
   // SET ACTIVE CONVERSATION
   // -----------------------------------
-useEffect(() => {
-  if (!userId) {
-    setActive(null);
-    return;
-  }
-
-  const existing = conversations.find(
-    (c) => c.user.id === Number(userId)
-  );
-
-  if (existing) {
-    setActive(existing);
-
-    if (existing.unread_count > 0) {
-      markAsRead.mutate(existing.user.id);
+  useEffect(() => {
+    if (!userId) {
+      setActive(null);
+      return;
     }
-  } 
-  else if (fetchedUser) {
-    // ✅ VIRTUAL CONVERSATION
-    setActive({
-      user: fetchedUser,
-      last_message: null,
-      unread_count: 0,
-      isVirtual: true,
-    });
-  }
-}, [userId, conversations, fetchedUser]);
-  
+
+    const existing = conversations.find(
+      (c) => c.user.id === Number(userId)
+    );
+
+    if (existing) {
+      setActive(existing);
+
+      if (existing.unread_count > 0) {
+        markAsRead.mutate(existing.user.id);
+      }
+    }
+    else if (fetchedUser) {
+      // ✅ VIRTUAL CONVERSATION
+      setActive({
+        user: fetchedUser,
+        last_message: null,
+        unread_count: 0,
+        isVirtual: true,
+      });
+    }
+  }, [userId, conversations, fetchedUser]);
+
 
   // -----------------------------------
   // SEND MESSAGE
@@ -85,13 +85,9 @@ useEffect(() => {
       <div className="inbox-left border-end slide-left">
 
         <div className="p-2 border-bottom bg-light d-flex align-items-center">
-          
-          <button
-            className="btn btn-link p-0 text-decoration-none"
-            onClick={() => nav("/user")}
-          >
-            <i className="ri-arrow-left-line me-2"></i>
-            Go Back to My Neuron
+
+          <button className="btn btn-outline-secondary mb-3" onClick={() => window.history.back()}>
+            <i className="ri-arrow-left-line me-1"></i> Back
           </button>
         </div>
 
@@ -103,13 +99,12 @@ useEffect(() => {
           {conversations.map((c) => (
             <div
               key={c.user.id}
-              className={`conversation-item stagger-item d-flex align-items-center p-3 ${
-                active?.user?.id === c.user.id ? "active" : ""
-              }`}
+              className={`conversation-item stagger-item d-flex align-items-center p-3 ${active?.user?.id === c.user.id ? "active" : ""
+                }`}
               onClick={() => nav(`/inbox/${c.user.id}`)}
             >
               <img
-                src={c.user.profile_image|| "https://i.pravatar.cc/100"}
+                src={c.user.profile_image || "https://i.pravatar.cc/100"}
                 className="inbox-avatar"
                 alt="avatar"
               />
@@ -156,9 +151,8 @@ useEffect(() => {
                 chat.map((m) => (
                   <div
                     key={m.id}
-                    className={`chat-bubble ${
-                      m.sender === active.user.id ? "them" : "me"
-                    }`}
+                    className={`chat-bubble ${m.sender === active.user.id ? "them" : "me"
+                      }`}
                   >
                     {m.content}
                   </div>

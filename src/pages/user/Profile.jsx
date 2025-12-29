@@ -1,33 +1,69 @@
 import { Link } from "react-router";
+import { useRef } from "react";
 import "../speaker/SpeakerProfile.css";
 import { usePersonalDetail } from "../../hooks/profile/usePersonalDetail";
 import { useProfessionalDetail } from "../../hooks/profile/useProfessionalDetail";
 import { useEducationList } from "../../hooks/profile/useEducationList";
-
-const user = JSON.parse(localStorage.getItem("user")) || {};
+import { useUserProfile } from "../../hooks/profile/useUserProfile"; // fetch latest user
+import { useUploadProfileImage } from "../../hooks/profile/useProfileImage";
 
 export default function Profile() {
+  const { data: user, isLoading: uLoading } = useUserProfile();
   const { data: personal, isLoading: pLoading } = usePersonalDetail();
   const { data: professional, isLoading: prLoading } = useProfessionalDetail();
   const { data: education, isLoading: eLoading } = useEducationList();
 
-  const isLoading = pLoading || prLoading || eLoading;
+  const uploadImageMutation = useUploadProfileImage();
+  const fileInputRef = useRef();
 
-  /* ================= LOADING ================= */
-  if (isLoading) {
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Show preview immediately
+    const previewURL = URL.createObjectURL(file);
+    const imgTag = document.querySelector(".profile-pic");
+    if (imgTag) imgTag.src = previewURL;
+
+    // Upload to backend
+    const formData = new FormData();
+    formData.append("profile_image", file);
+
+    uploadImageMutation.mutate(formData, {
+      onSuccess: (data) => {
+        // Update image src after successful upload
+        if (imgTag)
+          imgTag.src = data.profile_image.startsWith("http")
+            ? data.profile_image
+            : `http://127.0.0.1:8000${data.profile_image}`;
+      },
+      onError: (err) => {
+        console.error(err);
+        alert("Failed to upload image");
+      },
+    });
+  };
+
+  const isLoading = uLoading || pLoading || prLoading || eLoading;
+
+  if (isLoading)
     return (
       <div className="loader-wrapper">
         <div className="orbit-trail-true">
-          <span></span><span></span><span></span>
+          <span></span>
+          <span></span>
+          <span></span>
         </div>
         <p className="mt-3">Loading profile…</p>
       </div>
     );
-  }
 
   /* ================= PROFILE ================= */
   return (
     <div className="container py-4">
+      <button className="btn btn-outline-secondary mb-3" onClick={() => window.history.back()}>
+        <i className="ri-arrow-left-line me-1"></i> Back
+      </button>
       <div className="row g-4">
 
         {/* ================= LEFT ================= */}
@@ -38,46 +74,65 @@ export default function Profile() {
             <div className="card-body p-4 d-flex gap-4">
 
               {/* PHOTO */}
-              <img
-                src={
-                  user.profile_image
-                    ? `http://127.0.0.1:8000${user.profile_image}`
-                    : "https://i.pravatar.cc/150"
-                }
-                alt="profile"
-                className="rounded-circle shadow"
-                style={{ width: 150, height: 150, objectFit: "cover" }}
-              />
+              {/* PHOTO */}
+              <div className="position-relative d-inline-block">
+                <img
+                  src={
+                    user?.profile_image
+                      ? user.profile_image.startsWith("http")
+                        ? user.profile_image
+                        : `http://127.0.0.1:8000${user.profile_image}`
+                      : "images/Avatar 1.png"
+                  }
+                  alt="Profile"
+                  className="profile-pic rounded-circle shadow"
+                  style={{ width: 150, height: 150, objectFit: "cover" }}
+                />
+
+                {/* Pen icon */}
+                <div
+                  className="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle p-2"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => fileInputRef.current.click()}
+                >
+                  <i className="ri-pencil-line"></i>
+                </div>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </div>
+
+
 
               <div className="flex-grow-1">
 
                 {/* SOCIAL + LINKS */}
                 <div className="d-flex justify-content-between mb-3">
                   <div className="d-flex gap-3 fs-4 text-secondary">
-
                     {personal?.research_links?.map((link, idx) => (
-                      <a
-                        key={idx}
-                        href={link.url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
+                      <a key={idx} href={link.url} target="_blank" rel="noreferrer">
                         <i className="ri-links-line"></i>
                       </a>
                     ))}
 
                     {personal?.linkedin && (
-                      <a href={personal.linkedin} target="_blank">
+                      <a href={personal.linkedin} target="_blank" rel="noreferrer">
                         <i className="ri-linkedin-box-fill"></i>
                       </a>
                     )}
 
                     {personal?.x_handle && (
-                      <a href={`https://x.com/${personal.x_handle}`} target="_blank">
+                      <a href={`https://x.com/${personal.x_handle}`} target="_blank" rel="noreferrer">
                         <i className="ri-twitter-x-fill"></i>
                       </a>
                     )}
                   </div>
+
 
                   <Link to="/user/profile/edit" className="btn btn-dark rounded-pill">
                     Edit Profile
@@ -127,23 +182,38 @@ export default function Profile() {
                 <h5 className="mb-0">Current Position</h5>
               </div>
               <div className="card-body small text-secondary">
-                <p>
-                  <strong>{professional.current_role}</strong> —{" "}
-                  {professional.current_organization}
+                <p className="mb-1">
+                  <strong>{professional.current_role}</strong>
+                  {professional.current_organization && (
+                    <> — {professional.current_organization}</>
+                  )}
                 </p>
 
-                <p>
-                  {professional.current_department} <br />
-                  Since {professional.current_start_month}/
-                  {professional.current_start_year}
-                </p>
+                {(professional.current_department ||
+                  professional.current_start_month ||
+                  professional.current_start_year) && (
+                    <p className="mb-1">
+                      {professional.current_department && (
+                        <span>{professional.current_department}</span>
+                      )}
+                      {(professional.current_start_month ||
+                        professional.current_start_year) && (
+                          <>
+                            <br />
+                            Since {professional.current_start_month}/
+                            {professional.current_start_year}
+                          </>
+                        )}
+                    </p>
+                  )}
 
                 {professional.current_description && (
-                  <p>{professional.current_description}</p>
+                  <p className="mt-2">{professional.current_description}</p>
                 )}
               </div>
             </div>
           )}
+
 
           {/* ===== EDUCATION ===== */}
           <div className="card shadow-sm border-0 fade-up mb-4">
@@ -224,14 +294,17 @@ export default function Profile() {
               <h5 className="mb-0">Skills & Languages</h5>
             </div>
             <div className="card-body small text-secondary">
-              {professional?.skill_set && (
-                <p>
+              {professional?.skill_set ? (
+                <p className="mb-2">
                   <i className="ri-tools-line me-1"></i>
                   {professional.skill_set}
                 </p>
+              ) : (
+                <p className="text-muted">No skills added.</p>
               )}
+
               {professional?.languages_spoken && (
-                <p>
+                <p className="mb-0">
                   <i className="ri-translate-2 me-1"></i>
                   {professional.languages_spoken}
                 </p>
@@ -239,8 +312,9 @@ export default function Profile() {
             </div>
           </div>
 
+
           {/* ===== PUBLICATIONS ===== */}
-          <div className="card shadow-sm border-0 fade-up">
+          {/* <div className="card shadow-sm border-0 fade-up">
             <div className="card-header bg-white">
               <h5 className="mb-0">Publications</h5>
             </div>
@@ -248,7 +322,55 @@ export default function Profile() {
               <p>{personal?.articles_journals || "No journal articles listed."}</p>
               <p>{personal?.book_chapters || "No book chapters listed."}</p>
             </div>
+          </div> */}
+
+          <div className="card shadow-sm border-0 fade-up mb-4">
+            <div className="card-header bg-white">
+              <h5 className="mb-0">Contact & Work Info</h5>
+            </div>
+            <div className="card-body small text-secondary">
+
+              {professional?.work_email && (
+                <p>
+                  <i className="ri-mail-line me-1"></i>
+                  {professional.work_email}
+                </p>
+              )}
+
+              {professional?.contact_number && (
+                <p>
+                  <i className="ri-phone-line me-1"></i>
+                  {professional.contact_number}
+                </p>
+              )}
+
+              {professional?.website && (
+                <p>
+                  <i className="ri-global-line me-1"></i>
+                  <a href={professional.website} target="_blank" rel="noreferrer">
+                    {professional.website}
+                  </a>
+                </p>
+              )}
+
+              {professional?.lab && (
+                <p>
+                  <i className="ri-flask-line me-1"></i>
+                  {professional.lab}
+                </p>
+              )}
+
+              {professional?.work_address && (
+                <p className="mb-0">
+                  <i className="ri-map-pin-line me-1"></i>
+                  {professional.work_address}
+                </p>
+              )}
+
+            </div>
           </div>
+
+
 
         </div>
       </div>

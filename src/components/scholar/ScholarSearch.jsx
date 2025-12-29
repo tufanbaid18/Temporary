@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./ScholarSearch.css";
 import ScholarSearchFilter from "./ScholarSearchFilter";
 import pdfIcon from "../../assets/pdf-icon.png";
@@ -11,8 +11,19 @@ export default function ScholarSearch() {
   const [showShelfModal, setShowShelfModal] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [showMore, setShowMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
 
-  const { data, isLoading, isError } = usePubMedSearch(query);
+  const { data, isLoading, isError } = usePubMedSearch(query, page, PAGE_SIZE);
+
+
+  useEffect(() => {
+    if (page > 0) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [page]);
+
+
 
   const [filters, setFilters] = useState({
     textAvailability: "all",
@@ -49,17 +60,57 @@ export default function ScholarSearch() {
   //   };
   // });
 
-  const formattedResults = (data || []).map((art) => ({
-    id: art.id,
-    title: art.title,
-    authors: art.authors || "Unknown",
-    journal: art.journal || "Unknown Journal",
-    year: art.year || "",
-    abstract: art.abstract,
-    pdf: art.id
-      ? `https://pubmed.ncbi.nlm.nih.gov/${art.id}/`
-      : null,
-  }));
+  // const formattedResults = (data?.articles || []).map((art) => ({
+  //   id: art.id,
+  //   title: art.title,
+  //   authors: art.authors || "Unknown",
+  //   journal: art.journal || "Unknown Journal",
+  //   year: art.year || "",
+  //   abstract: art.abstract,
+  //   pdf: art.pmcid
+  //     ? `https://www.ncbi.nlm.nih.gov/pmc/articles/${art.pmcid}/pdf`
+  //     : null,
+  //   pubmed: `https://pubmed.ncbi.nlm.nih.gov/${art.id}/`,
+  // }));
+
+  const formattedResults = (data?.articles || []).map((art) => ({
+  id: art.id,
+  title: art.title,
+  authors: art.authors || "Unknown",
+  journal: art.journal || "Unknown Journal",
+  year: art.year || "",
+  abstract: art.abstract,
+  pdf: art.pdf,        // already set in hook
+  pubmed: art.pubmed,  // already set in hook
+}));
+
+
+
+  const getPaginationPages = (current, total) => {
+    const pages = [];
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      if (current <= 4) {
+        pages.push(1, 2, 3, 4, "...", total);
+      } else if (current >= total - 3) {
+        pages.push(1, "...", total - 3, total - 2, total - 1, total);
+      } else {
+        pages.push(
+          1,
+          "...",
+          current - 1,
+          current,
+          current + 1,
+          "...",
+          total
+        );
+      }
+    }
+
+    return pages;
+  };
 
 
 
@@ -113,9 +164,11 @@ export default function ScholarSearch() {
             <form
               className="d-flex justify-content-center"
               onSubmit={(e) => {
-                e.preventDefault();      // stop page reload
-                setQuery(queryInput);    // trigger search
+                e.preventDefault();
+                setPage(1);
+                setQuery(queryInput);
               }}
+
             >
               <input
                 type="text"
@@ -178,9 +231,9 @@ export default function ScholarSearch() {
                   <div className="d-flex justify-content-between">
                     <h5 className="article-title colored-title">{r.title}</h5>
 
-                    <button className="btn btn-light border bookmark-btn">
+                    {/* <button className="btn btn-light border bookmark-btn">
                       <i className="ri-bookmark-line"></i>
-                    </button>
+                    </button> */}
                   </div>
 
                   <div className="author-line small mb-2">
@@ -202,24 +255,18 @@ export default function ScholarSearch() {
 
 
                   {/* PDF BUTTON */}
+                  {/* PDF / PUBMED BUTTON */}
                   {r.pdf ? (
-                    <a
-                      href={r.pdf}
-                      target="_blank"
-                      className="btn btn-sm btn-outline-primary mt-2"
-                    >
-                      <i className="ri-file-download-line me-1"></i>
-                      Download PDF
+                    <a href={r.pdf} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary mt-2">
+                      <i className="ri-file-download-line me-1"></i> Download PDF
                     </a>
                   ) : (
-                    <button
-                      className="btn btn-sm btn-outline-secondary mt-2"
-                      disabled
-                    >
-                      <i className="ri-file-warning-line me-1"></i>
-                      PDF Not Available
-                    </button>
+                    <a href={r.pubmed} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-secondary mt-2">
+                      <i className="ri-external-link-line me-1"></i> View on PubMed
+                    </a>
                   )}
+
+
 
                   {/* ADD TO SHELF */}
                   <button
@@ -237,6 +284,35 @@ export default function ScholarSearch() {
               </div>
             </div>
           ))}
+
+          {/* PAGINATION */}
+          {query && data?.total > PAGE_SIZE && (
+            <nav className="d-flex justify-content-center mt-4">
+              <ul className="pagination">
+                {/* Previous */}
+                <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
+                  <button className="page-link" onClick={() => setPage(p => p - 1)}>
+                    Previous
+                  </button>
+                </li>
+
+                {/* Page numbers with ellipsis */}
+                {getPaginationPages(page, Math.ceil(data.total / PAGE_SIZE)).map((p, idx) => (
+                  <li key={idx} className={`page-item ${p === page ? "active" : ""} ${p === "..." ? "disabled" : ""}`}>
+                    <button className="page-link" onClick={() => p !== "..." && setPage(p)}>{p}</button>
+                  </li>
+                ))}
+
+                {/* Next */}
+                <li className={`page-item ${page >= Math.ceil(data.total / PAGE_SIZE) ? "disabled" : ""}`}>
+                  <button className="page-link" onClick={() => setPage(p => p + 1)}>Next</button>
+                </li>
+              </ul>
+            </nav>
+          )}
+
+
+
 
         </div>
 
