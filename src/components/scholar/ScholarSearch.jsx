@@ -127,7 +127,7 @@ export default function ScholarSearch() {
             <div className="search-section text-center mb-5">
               <div className="mb-4 text-center">
                 <img
-                  src="images/plasma.jpeg"
+                  src="/images/plasma.jpeg"
                   alt="PubMed Search"
                   style={{
                     height: "90px",
